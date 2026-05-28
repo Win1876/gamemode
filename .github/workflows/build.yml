@@ -22,6 +22,9 @@ jobs:
             build-essential \
             meson \
             ninja-build \
+            devscripts \
+            debhelper \
+            dpkg-dev \
             appstream \
             clang \
             clang-format \
@@ -37,15 +40,18 @@ jobs:
         run: |
           ./bootstrap.sh -Dwith-examples=true
 
-      - name: Create deb package
+      - name: Build deb package
         run: |
-          ninja -C builddir package || true
-          find . -name "*.deb"
+          dpkg-buildpackage -us -uc -b
+
+      - name: Show deb files
+        run: |
+          find .. -name "*.deb"
 
       - name: Upload deb package
         uses: actions/upload-artifact@v4
         with:
           name: deb-package
           path: |
-            ./**/*.deb
+            ../*.deb
           if-no-files-found: error
