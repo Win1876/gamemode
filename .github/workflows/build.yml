@@ -22,9 +22,7 @@ jobs:
             build-essential \
             meson \
             ninja-build \
-            devscripts \
-            debhelper \
-            dpkg-dev \
+            checkinstall \
             appstream \
             clang \
             clang-format \
@@ -40,18 +38,26 @@ jobs:
         run: |
           ./bootstrap.sh -Dwith-examples=true
 
-      - name: Build deb package
+      - name: Create deb package
         run: |
-          dpkg-buildpackage -us -uc -b
+          cd builddir
+
+          sudo checkinstall \
+            --type=debian \
+            --install=no \
+            --pkgname=gamemode \
+            --pkgversion=1.0 \
+            --default \
+            ninja install
 
       - name: Show deb files
         run: |
-          find .. -name "*.deb"
+          find . -name "*.deb"
 
       - name: Upload deb package
         uses: actions/upload-artifact@v4
         with:
           name: deb-package
           path: |
-            ../*.deb
+            ./**/*.deb
           if-no-files-found: error
